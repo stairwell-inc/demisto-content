@@ -19,7 +19,7 @@ import git
 import requests
 from CommonServerPython import *  # noqa: F401
 from demisto_sdk.commands.common.constants import ENTITY_TYPE_TO_DIR, FileType
-from demisto_sdk.commands.common.logger import DEFAULT_CONSOLE_THRESHOLD, logging_setup
+from demisto_sdk.commands.common.logger import logging_setup
 from demisto_sdk.commands.common.tools import find_type
 from demisto_sdk.commands.split.ymlsplitter import YmlSplitter
 from importlib.metadata import version
@@ -307,6 +307,9 @@ def convert_contribution_to_pack(contrib_converter):
 def prepare_content_pack_for_validation(filename: str, data: bytes, content_dir_path: str) -> str:
     from demisto_sdk.commands.init.contribution_converter import ContributionConverter
 
+    # Use only the base name of the file.
+    filename = os.path.basename(filename)
+
     # Write zip file data to file system.
     zip_path = os.path.abspath(os.path.join(content_dir_path, filename))
     with open(zip_path, "wb") as fp:
@@ -322,6 +325,9 @@ def prepare_content_pack_for_validation(filename: str, data: bytes, content_dir_
 
 def prepare_single_content_item_for_validation(file_name: str, data: bytes, packs_path: str) -> str:
     from demisto_sdk.commands.init.contribution_converter import ContributionConverter
+
+    # Use only the base name of the file.
+    file_name = os.path.basename(file_name)
 
     pack_name = "TmpPack"
     pack_path = os.path.join(packs_path, pack_name)
@@ -384,7 +390,7 @@ def run_validate(path_to_validate: str, json_output_file: str) -> int:
     initializer = Initializer(
         staged=False, committed_only=False, file_path=str(path_to_validate), execution_mode=ExecutionMode.SPECIFIC_FILES
     )
-    validate_manager = ValidateManager(result_writer, config_reader, initializer, allow_autofix=False)
+    validate_manager = ValidateManager(result_writer, config_reader, initializer, allow_autofix=False, ignore=["BA106"])
     demisto.debug(f"run_validate validate_manager initialized. Running validations: {validate_manager.validators=}")
     err_file = io.StringIO()
     with redirect_stderr(err_file):
@@ -780,7 +786,7 @@ def main():
             # Setup Demisto SDK's logging.
             logging_setup(
                 calling_function="ValidateContent",
-                console_threshold="DEBUG" if is_debug_mode() else DEFAULT_CONSOLE_THRESHOLD,
+                console_threshold="DEBUG" if is_debug_mode() else "ERROR",
                 propagate=True,
             )
             demisto.debug("Finished setting logger.")
