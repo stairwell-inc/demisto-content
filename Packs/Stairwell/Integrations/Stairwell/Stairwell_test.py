@@ -5,8 +5,6 @@ from Stairwell import (
     intake_preflight_and_upload,
     ai_triage_summarize_command,
     object_sightings_command,
-    object_detonation_trigger_command,
-    object_detonation_get_command,
     object_opinions_command,
     run_to_ground_generate_command,
     asn_get_whois_command,
@@ -293,25 +291,6 @@ def test_intake_preflight_and_upload_with_web_origin():
     assert "already exists in Stairwell" in results.readable_output
 
 
-def test_intake_preflight_and_upload_with_detonation_plan():
-    """Test intake_preflight_and_upload with detonation plan"""
-    mock_response = util_load_json("test_data/intake_preflight_already_exists.json")
-    mock_client = MagicMock()
-    mock_client.intake_preflight.return_value = mock_response
-
-    with (
-        patch("Stairwell.os.path.exists", return_value=True),
-        patch("Stairwell._hash_sha256", return_value=("abc123fakehash", None)),
-    ):
-        results = intake_preflight_and_upload(
-            mock_client, asset_id="test-asset", file_path="/path/to/test/file.exe", detonation_plan="test-plan"
-        )
-
-    assert isinstance(results, CommandResults)
-    assert results.readable_output
-    assert "already exists in Stairwell" in results.readable_output
-
-
 # AI Triage Tests
 def test_ai_triage_summarize_command_success(requests_mock):
     """Test AI Triage summarize command with successful response"""
@@ -396,48 +375,6 @@ def test_object_sightings_command_missing_args():
     """Test object sightings command with missing arguments"""
     with pytest.raises(DemistoException, match="Missing required arguments"):
         object_sightings_command(test_client_v1, "")
-
-
-# Object Detonation Trigger Tests
-def test_object_detonation_trigger_command_success(requests_mock):
-    """Test object detonation trigger command with successful response"""
-    mock_response = {"status": "triggered", "detonation_id": "det-123"}
-
-    requests_mock.post(f"https://app.stairwell.com/v1/objects/{TEST_OBJECT_ID}/detonation:trigger", json=mock_response)
-
-    results = object_detonation_trigger_command(test_client_v1, TEST_OBJECT_ID)
-
-    assert isinstance(results, CommandResults)
-    assert results.readable_output
-    assert "Detonation triggered" in results.readable_output
-    assert results.outputs_prefix == "Stairwell.Detonation.Trigger"
-
-
-def test_object_detonation_trigger_command_missing_args():
-    """Test object detonation trigger command with missing arguments"""
-    with pytest.raises(DemistoException, match="Missing required arguments"):
-        object_detonation_trigger_command(test_client_v1, "")
-
-
-# Object Detonation Get Tests
-def test_object_detonation_get_command_success(requests_mock):
-    """Test object detonation get command with successful response"""
-    mock_response = {"status": "completed", "results": {"behavior": "malicious", "score": 95}}
-
-    requests_mock.get(f"https://app.stairwell.com/v1/objects/{TEST_OBJECT_ID}/detonation", json=mock_response)
-
-    results = object_detonation_get_command(test_client_v1, TEST_OBJECT_ID)
-
-    assert isinstance(results, CommandResults)
-    assert results.readable_output
-    assert results.outputs_prefix == "Stairwell.Detonation"
-    assert results.outputs.get("status") == "completed"
-
-
-def test_object_detonation_get_command_missing_args():
-    """Test object detonation get command with missing arguments"""
-    with pytest.raises(DemistoException, match="Missing required arguments"):
-        object_detonation_get_command(test_client_v1, "")
 
 
 # Object Opinions Tests
@@ -1302,18 +1239,6 @@ def test_object_opinions_command_404(requests_mock):
     requests_mock.get(f"https://app.stairwell.com/v1/objects/{TEST_OBJECT_ID}/opinions", status_code=404)
     results = object_opinions_command(test_client_v1, TEST_OBJECT_ID)
     assert "Object not found" in results.readable_output
-
-
-def test_object_detonation_trigger_command_404(requests_mock):
-    requests_mock.post(f"https://app.stairwell.com/v1/objects/{TEST_OBJECT_ID}/detonation:trigger", status_code=404)
-    results = object_detonation_trigger_command(test_client_v1, TEST_OBJECT_ID)
-    assert "Object not found" in results.readable_output
-
-
-def test_object_detonation_get_command_404(requests_mock):
-    requests_mock.get(f"https://app.stairwell.com/v1/objects/{TEST_OBJECT_ID}/detonation", status_code=404)
-    results = object_detonation_get_command(test_client_v1, TEST_OBJECT_ID)
-    assert "No detonation results found" in results.readable_output
 
 
 def test_ai_triage_summarize_command_400(requests_mock):

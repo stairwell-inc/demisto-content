@@ -86,9 +86,6 @@ script:
     - name: sha256
       required: false
       description: The SHA256 hash of the file. If not provided, it will be calculated automatically.
-    - name: detonation_plan
-      required: false
-      description: The name of the detonation plan to use.
     - name: origin_type
       required: false
       description: The origin type of the file. Can be web or unspecified.
@@ -132,26 +129,6 @@ script:
     - contextPath: Stairwell.Sightings.objectSightings
       type: Unknown
       description: The sightings of the object across assets.
-  - name: stairwell-object-detonation-trigger
-    arguments:
-    - name: object_id
-      required: true
-      description: The SHA256 hash or object ID of the object.
-    description: Triggers a sandbox detonation for an object.
-    outputs:
-    - contextPath: Stairwell.Detonation.Trigger
-      type: Dictionary
-      description: Detonation trigger response.
-  - name: stairwell-object-detonation-get
-    arguments:
-    - name: object_id
-      required: true
-      description: The SHA256 hash or object ID of the object.
-    description: Gets sandbox detonation details for an object.
-    outputs:
-    - contextPath: Stairwell.Detonation
-      type: Dictionary
-      description: Detonation details.
   - name: stairwell-object-opinions
     arguments:
     - name: object_id

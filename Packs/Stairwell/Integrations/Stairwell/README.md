@@ -99,7 +99,6 @@ Uploads a file to Stairwell for analysis.
 | url | The HTTP or HTTPS URL to download the file from. | Optional | 
 | file_path | The direct path to the file. Used for development and testing. | Optional | 
 | sha256 | The SHA256 hash of the file. If not provided, it will be calculated automatically. | Optional | 
-| detonation_plan | The name of the detonation plan to use. | Optional | 
 | origin_type | The origin type of the file. Can be web or unspecified. Possible values are: web, unspecified. | Optional | 
 | origin_referrer_url | The HTTP referrer URL for the file origin. | Optional | 
 | origin_host_url | The original host URL for the file origin. | Optional | 
@@ -138,54 +137,6 @@ Lists all sightings for an object across the organization's assets.
 | --- | --- | --- |
 | Stairwell.Sightings.objectId | String | The object ID that was queried. | 
 | Stairwell.Sightings.objectSightings | Unknown | The sightings of the object across assets. | 
-
-### stairwell-object-detonation-trigger
-
-***
-Triggers a sandbox detonation for an object.
-
-#### Base Command
-
-`stairwell-object-detonation-trigger`
-
-#### Command example
-```!stairwell-object-detonation-trigger object_id=f916f8c54f8228926e2eaa9d712658f6d97ddd54382048225c5e6a1813c4337b```
-
-#### Input
-
-| **Argument Name** | **Description** | **Required** |
-| --- | --- | --- |
-| object_id | The SHA256 hash or object ID of the object. | Required | 
-
-#### Context Output
-
-| **Path** | **Type** | **Description** |
-| --- | --- | --- |
-| Stairwell.Detonation.Trigger | Dictionary | Detonation trigger response. | 
-
-### stairwell-object-detonation-get
-
-***
-Gets sandbox detonation details for an object.
-
-#### Base Command
-
-`stairwell-object-detonation-get`
-
-#### Command example
-```!stairwell-object-detonation-get object_id=7986bbaee8940da11ce089383521ab420c443ab7b15ed42aed91fd31ce833896```
-
-#### Input
-
-| **Argument Name** | **Description** | **Required** |
-| --- | --- | --- |
-| object_id | The SHA256 hash or object ID of the object. | Required | 
-
-#### Context Output
-
-| **Path** | **Type** | **Description** |
-| --- | --- | --- |
-| Stairwell.Detonation | Dictionary | Detonation details. | 
 
 ### stairwell-object-opinions
 
@@ -810,8 +761,6 @@ Gets a specific asset by ID.
 2. Discover variants → `stairwell-variant-discovery`
 3. Get AI analysis → `stairwell-ai-triage-summarize`
 4. Check sightings → `stairwell-object-sightings`
-5. Trigger detonation → `stairwell-object-detonation-trigger`
-6. Retrieve results → `stairwell-object-detonation-get`
 
 **File Upload & Analysis Workflow:**
 

@@ -282,14 +282,6 @@ class Client(BaseClient):
         """List sightings for a given object."""
         return self._request("GET", f"{OBJECTS_BASE_URL}{object_id}/sightings")
 
-    def trigger_object_detonation(self, object_id: str) -> dict[str, Any]:
-        """Trigger detonation for an object."""
-        return self._request("POST", f"{OBJECTS_BASE_URL}{object_id}/detonation:trigger")
-
-    def get_object_detonation(self, object_id: str) -> dict[str, Any]:
-        """Get detonation details for an object."""
-        return self._request("GET", f"{OBJECTS_BASE_URL}{object_id}/detonation")
-
     def list_object_opinions(self, object_id: str) -> dict[str, Any]:
         """List opinions for an object."""
         return self._request("GET", f"{OBJECTS_BASE_URL}{object_id}/opinions")
@@ -788,53 +780,6 @@ def object_sightings_command(client: Client, object_id: str) -> CommandResults:
             raise err
 
 
-def object_detonation_trigger_command(client: Client, object_id: str) -> CommandResults:
-    _require_args({"object_id": object_id})
-
-    try:
-        response = client.trigger_object_detonation(object_id)
-        readable = "Detonation triggered successfully." if response else "Detonation trigger request sent."
-
-        # Add objectId to response for key field tracking
-        if isinstance(response, dict):
-            response["objectId"] = object_id
-
-        return CommandResults(
-            readable_output=readable,
-            outputs_prefix="Stairwell.Detonation.Trigger",
-            outputs_key_field="objectId",
-            outputs=response,
-        )
-    except DemistoException as err:
-        if _status_code(err) == 404:
-            return CommandResults(readable_output=f"Object not found: {object_id}")
-        elif _status_code(err) == 403:
-            return CommandResults(readable_output=f"Permission denied for detonation: {object_id}. Check API key permissions.")
-        else:
-            raise err
-
-
-def object_detonation_get_command(client: Client, object_id: str) -> CommandResults:
-    _require_args({"object_id": object_id})
-
-    try:
-        response = client.get_object_detonation(object_id)
-        readable = tableToMarkdown("Detonation Details", response) if isinstance(response, dict) else str(response)
-
-        # Add objectId to response for key field tracking
-        if isinstance(response, dict):
-            response["objectId"] = object_id
-
-        return CommandResults(
-            readable_output=readable, outputs_prefix="Stairwell.Detonation", outputs_key_field="objectId", outputs=response
-        )
-    except DemistoException as err:
-        if _status_code(err) == 404:
-            return CommandResults(readable_output=f"No detonation results found for object: {object_id}")
-        else:
-            raise err
-
-
 def object_opinions_command(client: Client, object_id: str) -> CommandResults:
     _require_args({"object_id": object_id})
 
@@ -1242,7 +1187,6 @@ def intake_preflight_and_upload(
     url: str | None = None,
     file_path: str | None = None,
     sha256: str | None = None,
-    detonation_plan: str | None = None,
     origin_type: str | None = None,
     origin_referrer_url: str | None = None,
     origin_host_url: str | None = None,
@@ -1306,8 +1250,6 @@ def intake_preflight_and_upload(
             "expected_attributes": {"identifiers": expected_identifiers} if expected_identifiers else {},
             "origin": origin_obj,
         }
-        if detonation_plan:
-            file_obj["detonation_plan"] = detonation_plan
 
         payload: dict[str, Any] = {"asset": {"id": asset_id}, "files": [file_obj]}
 
@@ -1605,7 +1547,6 @@ def main() -> None:  # pragma: no cover
                 url=args.get("url"),
                 file_path=args.get("file_path"),
                 sha256=args.get("sha256"),
-                detonation_plan=args.get("detonation_plan"),
                 origin_type=args.get("origin_type"),
                 origin_referrer_url=args.get("origin_referrer_url"),
                 origin_host_url=args.get("origin_host_url"),
@@ -1622,8 +1563,6 @@ def main() -> None:  # pragma: no cover
             "stairwell-variant-discovery": (variant_discovery_command, ["sha256"]),
             "stairwell-ai-triage-summarize": (ai_triage_summarize_command, ["object_id"]),
             "stairwell-object-sightings": (object_sightings_command, ["object_id"]),
-            "stairwell-object-detonation-trigger": (object_detonation_trigger_command, ["object_id"]),
-            "stairwell-object-detonation-get": (object_detonation_get_command, ["object_id"]),
             "stairwell-object-opinions": (object_opinions_command, ["object_id"]),
             "stairwell-run-to-ground-generate": (run_to_ground_generate_command, ["object_ids"]),
             # Network Intel

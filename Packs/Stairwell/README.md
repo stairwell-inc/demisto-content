@@ -38,10 +38,6 @@ Get AI-generated summaries for files including comprehensive threat analysis, in
 
 List all sightings for a specific object across your organization's assets. Sightings show where and when files have been observed in your environment.
 
-### Object Detonation
-
-Trigger and retrieve detonation results for objects in Stairwell's sandbox environment. Provides detailed behavioral analysis of how files execute in isolated environments.
-
 ### Object Opinions
 
 Retrieve opinions and assessments for objects. Opinions provide additional context and analysis from Stairwell's threat intelligence.
